@@ -303,6 +303,14 @@ class HBNBCommand(cmd.Cmd):
             # type cast as necessary
             if att_name in HBNBCommand.types:
                 att_val = HBNBCommand.types[att_name](att_val)
+            else:
+                try:
+                    att_val = int(att_val)
+                except ValueError:
+                    try:
+                        att_val = float(att_val)
+                    except ValueError:
+                        pass
 
             setattr(obj, att_name, att_val)
 
