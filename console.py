@@ -18,7 +18,7 @@ class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
 
     # determines prompt for interactive/non-interactive modes
-    prompt = '(hbnb) '
+    prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
     classes = {
                'BaseModel': BaseModel, 'User': User, 'Place': Place,
@@ -31,6 +31,17 @@ class HBNBCommand(cmd.Cmd):
              'max_guest': int, 'price_by_night': int,
              'latitude': float, 'longitude': float
             }
+
+    def preloop(self):
+        """Prints if isatty is false"""
+        if not sys.__stdin__.isatty():
+            print('(hbnb)')
+
+    def postcmd(self, stop, line):
+        """Prints if isatty is false"""
+        if not sys.__stdin__.isatty() and not stop:
+            print('(hbnb) ', end='')
+        return stop
 
     def args_split(self, string):
         """Splits a string into a list of strings based on ", ".
@@ -117,19 +128,8 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        args = args.partition(" ")
-        cls_name = args[0]
-        params = args[2]
-
-        if not cls_name:
+        if not args:
             print("** class name missing **")
-            return
-
-        if cls_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-
-        p_dict = {}
 
         if params:
             params = params.strip().split(" ")
@@ -324,40 +324,3 @@ class HBNBCommand(cmd.Cmd):
 
                 attrs[attr_arg] = attr_val
 
-        if not attrs:
-            print("** attribute name missing **")
-            return
-
-        for att_name, att_val in attrs.items():
-            if not att_name:
-                print("** attribute name missing **")
-                return
-
-            if not att_val:
-                print("** value missing **")
-                return
-
-            # type cast as necessary
-            if att_name in HBNBCommand.types:
-                att_val = HBNBCommand.types[att_name](att_val)
-            else:
-                try:
-                    att_val = int(att_val)
-                except ValueError:
-                    try:
-                        att_val = float(att_val)
-                    except ValueError:
-                        pass
-
-            setattr(obj, att_name, att_val)
-
-        obj.save()
-
-    def help_update(self):
-        """ Help information for the update class """
-        print("Updates an object with new information")
-        print("Usage: update <className> <id> <attName> <attVal>\n")
-
-
-if __name__ == "__main__":
-    HBNBCommand().cmdloop()
