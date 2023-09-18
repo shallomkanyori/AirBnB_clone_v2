@@ -137,20 +137,30 @@ class TestConsole_other(TestConsoleBase):
 class TestConsole_create(TestConsoleBase):
     """Unit tests for the create command of the console."""
 
-    def assert_output_create(self, cls):
-        """Tests the output of the create command.
+    def assert_output_create_gen(self, cls, cmd):
+        """Checks and returns the output of a given create command.
 
         Args:
             cls: the name of the class to create an instance of.
+            cmd: the create command.
         """
-
-        cmd = f"create {cls}"
 
         res = self.get_output(cmd)
         self.assertIsNotNone(res)
         self.assertIsInstance(uuid.UUID(res), uuid.UUID)
         key = f"{cls}.{res}"
         self.assertIn(key, models.storage.all())
+
+        return key
+
+    def assert_output_create(self, cls):
+        """Tests the output of the create command.
+
+        Args:
+            cls: the name of the class to create an instance of.
+        """
+        cmd = f"create {cls}"
+        self.assert_output_create_gen(cls, cmd)
 
     def test_create(self):
         """Tests the create command."""
@@ -171,6 +181,130 @@ class TestConsole_create(TestConsoleBase):
 
         res = self.get_output("create MyModel")
         self.assertEqual(res, self.error_msgs[1])
+
+        res = self.get_output('create p_name="p_val"')
+        self.assertEqual(res, self.error_msgs[1])
+
+        res = self.get_output('create MyModel p_name="p_val"')
+        self.assertEqual(res, self.error_msgs[1])
+
+    def assert_output_create_params(self, cls, p_name, p_val, p_exp):
+        """Tests the output of the create command with parameters.
+
+        Args:
+            cls: the name of the class to create an instance of.
+            p_name: the name of the paramter.
+            p_val: the value of the parameter.
+            p_exp: the expected value of the parameter after creation.
+        """
+
+        cmd = f"create {cls} {p_name}={p_val}"
+
+        key = self.assert_output_create_gen(cls, cmd)
+        objects = models.storage.all()
+        inst = objects[key]
+
+        self.assertEqual(getattr(inst, p_name, None), p_exp)
+
+    def assert_output_create_params_types(self, cls):
+        """Test the create command with parameters of different types.
+
+        Args:
+            cls: the name of the class to create an instance of.
+        """
+
+        p_name = 'string'
+        p_val = '"string"'
+        p_exp = 'string'
+        self.assert_output_create_params(cls, p_name, p_val, p_exp)
+
+        p_name = 'string_with_quotes'
+        p_val = r'"string\"quotes"'
+        p_exp = 'string"quotes'
+        self.assert_output_create_params(cls, p_name, p_val, p_exp)
+
+        p_name = 'string_with_spaces'
+        p_val = '"string_with_spaces"'
+        p_exp = 'string with spaces'
+        self.assert_output_create_params(cls, p_name, p_val, p_exp)
+
+        p_name = 'string_with_quotes_spaces'
+        p_val = r'"string_with\"quotes_spaces"'
+        p_exp = 'string with"quotes spaces'
+        self.assert_output_create_params(cls, p_name, p_val, p_exp)
+
+        p_name = 'float_p'
+        p_val = 20.4
+        p_exp = 20.4
+        self.assert_output_create_params(cls, p_name, p_val, p_exp)
+
+        p_name = 'integer'
+        p_val = 3
+        p_exp = 3
+        self.assert_output_create_params(cls, p_name, p_val, p_exp)
+
+    def test_create_params(self):
+        """Test the create command with parameters"""
+
+        self.assert_output_create_params_types("BaseModel")
+        self.assert_output_create_params_types("User")
+        self.assert_output_create_params_types("State")
+        self.assert_output_create_params_types("City")
+        self.assert_output_create_params_types("Amenity")
+        self.assert_output_create_params_types("Place")
+        self.assert_output_create_params_types("Review")
+
+    def test_create_params_multi(self):
+        """Test the create command with multiple parameters."""
+
+        cmd = r'create BaseModel '
+        cmd += r'string="\"My_little_house\"" '
+        cmd += r'flt=20.4 integer=9'
+
+        key = self.assert_output_create_gen('BaseModel', cmd)
+        obj = models.storage.all()[key]
+
+        self.assertEqual(obj.string, '"My little house"')
+        self.assertEqual(obj.flt, 20.4)
+        self.assertEqual(obj.integer, 9)
+
+    def test_create_params_invalid(self):
+        """Ensure the create command skips parameters that don't fit."""
+
+        cmd = 'create BaseModel string1=string'
+        key = self.assert_output_create_gen('BaseModel', cmd)
+        obj = models.storage.all()[key]
+        self.assertFalse(hasattr(obj, 'string1'))
+
+        cmd = 'create BaseModel string2="s p a c e s"'
+        key = self.assert_output_create_gen('BaseModel', cmd)
+        obj = models.storage.all()[key]
+        self.assertFalse(hasattr(obj, 'string2'))
+
+        cmd = 'create BaseModel string3="quot"es"'
+        key = self.assert_output_create_gen('BaseModel', cmd)
+        obj = models.storage.all()[key]
+        self.assertFalse(hasattr(obj, 'string3'))
+
+        cmd = 'create BaseModel flt=20.4.5'
+        key = self.assert_output_create_gen('BaseModel', cmd)
+        obj = models.storage.all()[key]
+        self.assertFalse(hasattr(obj, 'flt'))
+
+        cmd = 'create BaseModel integer=--20'
+        key = self.assert_output_create_gen('BaseModel', cmd)
+        obj = models.storage.all()[key]
+        self.assertFalse(hasattr(obj, 'integer'))
+
+        cmd = 'create BaseModel other=["list"]'
+        key = self.assert_output_create_gen('BaseModel', cmd)
+        obj = models.storage.all()[key]
+        self.assertFalse(hasattr(obj, 'other'))
+
+        cmd = 'create BaseModel other={dict: "val"}'
+        key = self.assert_output_create_gen('BaseModel', cmd)
+        obj = models.storage.all()[key]
+        self.assertFalse(hasattr(obj, 'other'))
 
 
 class TestConsole_count(TestConsoleBase):

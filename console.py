@@ -18,7 +18,7 @@ class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
 
     # determines prompt for interactive/non-interactive modes
-    prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
+    prompt = '(hbnb) '
 
     classes = {
                'BaseModel': BaseModel, 'User': User, 'Place': Place,
@@ -31,17 +31,6 @@ class HBNBCommand(cmd.Cmd):
              'max_guest': int, 'price_by_night': int,
              'latitude': float, 'longitude': float
             }
-
-    def preloop(self):
-        """Prints if isatty is false"""
-        if not sys.__stdin__.isatty():
-            print('(hbnb)')
-
-    def postcmd(self, stop, line):
-        """Prints if isatty is false"""
-        if not sys.__stdin__.isatty() and not stop:
-            print('(hbnb) ', end='')
-        return stop
 
     def args_split(self, string):
         """Splits a string into a list of strings based on ", ".
@@ -128,14 +117,62 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
+        args = args.partition(" ")
+        cls_name = args[0]
+        params = args[2]
+
+        if not cls_name:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+
+        if cls_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
 
-        new_instance = HBNBCommand.classes[args]()
+        p_dict = {}
+
+        if params:
+            params = params.strip().split(" ")
+
+            for p in params:
+                p = p.partition("=")
+                if not p:
+                    continue
+
+                p_name = p[0]
+                p_val = p[2]
+                if not p_name or not p_val:
+                    continue
+
+                if p_val[0] == p_val[-1] == '"':
+                    # string value
+                    p_val = p_val[1:-1]
+
+                    # double quotes must be escaped
+                    if (re.search(r'(?<!\\)"', p_val)):
+                        continue
+
+                    p_val = p_val.replace('\\"', '"')
+                    p_val = p_val.replace('_', ' ')
+
+                elif re.match(r'^[-]?[0-9]+\.[0-9]+$', p_val):
+                    # float value
+                    p_val = float(p_val)
+
+                else:
+                    # int or invalid
+                    try:
+                        p_val = int(p_val)
+                    except ValueError:
+                        continue
+
+                p_dict[p_name] = p_val
+
+        if p_dict:
+            new_instance = HBNBCommand.classes[cls_name](**p_dict)
+        else:
+            new_instance = HBNBCommand.classes[cls_name]()
+
         new_instance.save()
         print(new_instance.id)
 

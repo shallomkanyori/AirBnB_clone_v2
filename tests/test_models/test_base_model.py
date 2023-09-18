@@ -72,10 +72,14 @@ class test_basemodel(unittest.TestCase):
             new = self.value(**n)
 
     def test_kwargs_one(self):
-        """Test instantiating with **kwargs, insufficient arguments."""
-        n = {'Name': 'test'}
-        with self.assertRaises(KeyError):
-            new = self.value(**n)
+        "Test instantiating with **kwargs, insufficient arguments."
+        n = {'name': 'test'}
+        new = self.value(**n)
+
+        self.assertIsInstance(new.id, str)
+        self.assertIsInstance(new.created_at, datetime.datetime)
+        self.assertIsInstance(new.updated_at, datetime.datetime)
+        self.assertEqual(new.name, 'test')
 
     def test_id(self):
         """Test the id attribute."""
