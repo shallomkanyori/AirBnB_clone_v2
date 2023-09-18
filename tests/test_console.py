@@ -310,55 +310,43 @@ class TestConsole_create(TestConsoleBase):
 class TestConsole_count(TestConsoleBase):
     """Unit tests for the .count() command."""
 
+    def assert_output_count(self, cls):
+        """Tests the output of the .count() method.
+
+        Args:
+            cls: the name of the cls to test.
+        """
+
+        cmd = f'{cls}.count()'
+        res = self.get_output(cmd)
+        self.assertEqual(res, "0")
+
+        inst1 = eval(cls)()
+        inst1.save()
+        res = self.get_output(cmd)
+        self.assertEqual(res, "1")
+
+        inst2 = eval(cls)()
+        inst2.save()
+        res = self.get_output(cmd)
+        self.assertEqual(res, "2")
+
     def test_count(self):
         """Tets the .count() method."""
 
-        res = self.get_output("BaseModel.count()")
-        self.assertEqual(res, "0")
-        b1 = BaseModel()
-        res = self.get_output("BaseModel.count()")
-        self.assertEqual(res, "1")
+        self.assert_output_count("BaseModel")
+        self.assert_output_count("User")
+        self.assert_output_count("State")
+        self.assert_output_count("City")
+        self.assert_output_count("Amenity")
+        self.assert_output_count("Place")
+        self.assert_output_count("Review")
 
-        res = self.get_output("User.count()")
-        self.assertEqual(res, "0")
-        u1 = User()
-        u2 = User()
-        res = self.get_output("User.count()")
-        self.assertEqual(res, "2")
+    def test_count_no_cls(self):
+        """Tests the .count() method without a class."""
 
-        res = self.get_output("State.count()")
-        self.assertEqual(res, "0")
-        s1 = State()
-        s2 = State()
-        s3 = State()
-        res = self.get_output("State.count()")
-        self.assertEqual(res, "3")
-
-        res = self.get_output("City.count()")
-        self.assertEqual(res, "0")
-        c1 = City()
-        res = self.get_output("City.count()")
-        self.assertEqual(res, "1")
-
-        res = self.get_output("Amenity.count()")
-        self.assertEqual(res, "0")
-        a1 = Amenity()
-        a2 = Amenity()
-        res = self.get_output("Amenity.count()")
-        self.assertEqual(res, "2")
-
-        res = self.get_output("Place.count()")
-        self.assertEqual(res, "0")
-        p1 = Place()
-        res = self.get_output("Place.count()")
-        self.assertEqual(res, "1")
-
-        res = self.get_output("Review.count()")
-        self.assertEqual(res, "0")
-        r1 = Review()
-        r2 = Review()
-        res = self.get_output("Review.count()")
-        self.assertEqual(res, "2")
+        res = self.get_output(".count()")
+        self.assertEqual(res, self.error_msgs[6] + ".count()")
 
 
 class TestConsole_show(TestConsoleBase):
@@ -384,6 +372,7 @@ class TestConsole_show(TestConsoleBase):
         """
 
         inst = eval(cls)()
+        inst.save()
         res = self.get_output_show(cls, inst.id)
         self.assertEqual(res, str(inst))
 
@@ -417,6 +406,7 @@ class TestConsole_show(TestConsoleBase):
         """Make sure any other arguments to the show command are ignored."""
 
         b = BaseModel()
+        b.save()
 
         cmd = f"show BaseModel {b.id} other arguments"
         res = self.get_output(cmd)
@@ -430,6 +420,7 @@ class TestConsole_show(TestConsoleBase):
         """
 
         inst = eval(cls)()
+        inst.save()
         show_res = self.get_output_show(cls, inst.id)
 
         cmd = f"{cls}.show({inst.id})"
@@ -467,6 +458,7 @@ class TestConsole_show(TestConsoleBase):
         """Make sure any other arguments to the .show() command are ignored."""
 
         b = BaseModel()
+        b.save()
 
         cmd_str = f"BaseModel.show({b.id}, other, arguments)"
         res = self.get_output(cmd_str)
@@ -484,6 +476,7 @@ class TestConsole_destroy(TestConsoleBase):
         """
 
         inst = eval(cls)()
+        inst.save()
 
         cmd = f"destroy {cls} {inst.id}"
         res = self.get_output(cmd)
@@ -521,6 +514,7 @@ class TestConsole_destroy(TestConsoleBase):
         """Make sure any other arguments to the destroy command are ignored."""
 
         b = BaseModel()
+        b.save()
 
         cmd = f"destroy BaseModel {b.id} other arguments"
         res = self.get_output(cmd)
@@ -536,6 +530,7 @@ class TestConsole_destroy(TestConsoleBase):
         """
 
         inst = eval(cls)()
+        inst.save()
 
         cmd = f"{cls}.destroy({inst.id})"
         res = self.get_output(cmd)
@@ -578,6 +573,7 @@ class TestConsole_destroy(TestConsoleBase):
         """
 
         b = BaseModel()
+        b.save()
 
         cmd = f"BaseModel.destroy({b.id}, other, arguments)"
         res = self.get_output(cmd)
@@ -590,7 +586,7 @@ class TestConsole_all(TestConsoleBase):
     """Unit tests for the all command of the console."""
 
     def assert_output_all(self, cls):
-        """Tests the output of the all command..
+        """Tests the output of the all command.
 
         Args:
             cls: the name of the class to print all instances of.
@@ -606,54 +602,42 @@ class TestConsole_all(TestConsoleBase):
         for inst_id in obj_ids:
             self.assertIn(inst_id, res)
 
+    def assert_output_all_cls(self, cls):
+        """Tests the output of the all command for a class.
+
+        Args:
+            cls: the name of the class to print all instances of.
+        """
+
+        cmd = f"all {cls}"
+        self.assertEqual(self.get_output(cmd), "[]")
+        inst1 = eval(cls)()
+        inst1.save()
+        inst2 = eval(cls)()
+        inst2.save()
+        self.assert_output_all(cls)
+
     def test_all(self):
         """Tests the all command."""
 
         no_arg_res = self.get_output("all")
         self.assertEqual(no_arg_res, "[]")
 
-        self.assertEqual(self.get_output("all BaseModel"), "[]")
-        b1 = BaseModel()
-        b2 = BaseModel()
-        self.assert_output_all("BaseModel")
+        self.assert_output_all_cls("BaseModel")
+        self.assert_output_all_cls("User")
+        self.assert_output_all_cls("State")
+        self.assert_output_all_cls("City")
+        self.assert_output_all_cls("Amenity")
+        self.assert_output_all_cls("Place")
+        self.assert_output_all_cls("Review")
 
-        self.assertEqual(self.get_output("all User"), "[]")
-        u1 = User()
-        self.assert_output_all("User")
-
-        self.assertEqual(self.get_output("all State"), "[]")
-        s1 = State()
-        s2 = State()
-        s3 = State()
-        self.assert_output_all("State")
-
-        self.assertEqual(self.get_output("all City"), "[]")
-        c1 = City()
-        self.assert_output_all("City")
-
-        self.assertEqual(self.get_output("all Amenity"), "[]")
-        a1 = Amenity()
-        self.assert_output_all("Amenity")
-
-        self.assertEqual(self.get_output("all Place"), "[]")
-        p1 = Place()
-        self.assert_output_all("Place")
-
-        self.assertEqual(self.get_output("all Review"), "[]")
-        r1 = Review()
-        self.assert_output_all("Review")
+        objects = models.storage.all()
+        obj_ids = [obj.id for obj in objects.values()]
 
         no_arg_res = self.get_output("all")
-        self.assertIn(b1.id, no_arg_res)
-        self.assertIn(b2.id, no_arg_res)
-        self.assertIn(u1.id, no_arg_res)
-        self.assertIn(s1.id, no_arg_res)
-        self.assertIn(s2.id, no_arg_res)
-        self.assertIn(s3.id, no_arg_res)
-        self.assertIn(c1.id, no_arg_res)
-        self.assertIn(a1.id, no_arg_res)
-        self.assertIn(p1.id, no_arg_res)
-        self.assertIn(r1.id, no_arg_res)
+
+        for inst_id in obj_ids:
+            self.assertIn(inst_id, no_arg_res)
 
     def test_all_errors(self):
         """Make sure correct errors are displayed for the all command."""
@@ -672,6 +656,7 @@ class TestConsole_all(TestConsoleBase):
         """
 
         inst = eval(cls)()
+        inst.save()
 
         res = self.get_output(f"{cls}.all()")
         self.assertIn(inst.id, res)
@@ -777,6 +762,7 @@ class TestConsole_update(TestConsoleBase):
             cls: the name of the class of the the instance to update
         """
         inst = eval(cls)()
+        inst.save()
 
         attr_name = "string_arg"
         attr_val = "string"
@@ -829,6 +815,7 @@ class TestConsole_update(TestConsoleBase):
         self.assertEqual(res, self.error_msgs[3])
 
         b = BaseModel()
+        b.save()
         cmd = f"update BaseModel {b.id}"
         res = self.get_output(cmd)
         self.assertEqual(res, self.error_msgs[4])
@@ -841,6 +828,7 @@ class TestConsole_update(TestConsoleBase):
         """Make sure any other arguments to the update command are ignored."""
 
         b = BaseModel()
+        b.save()
 
         attr = "attr"
         attr_val = 89
@@ -873,6 +861,7 @@ class TestConsole_update(TestConsoleBase):
         self.assertEqual(res, self.error_msgs[3])
 
         b = BaseModel()
+        b.save()
         cmd = f"BaseModel.update({b.id})"
         res = self.get_output(cmd)
         self.assertEqual(res, self.error_msgs[4])
@@ -894,6 +883,7 @@ class TestConsole_update(TestConsoleBase):
         """
 
         b = BaseModel()
+        b.save()
 
         attr = "attr"
         attr_val = 89

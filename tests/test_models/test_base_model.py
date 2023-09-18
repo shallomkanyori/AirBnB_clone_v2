@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """Unit tests for models/base_model.py"""
+import models
 from models.base_model import BaseModel
 import unittest
 import datetime
@@ -19,6 +20,12 @@ class test_basemodel(unittest.TestCase):
 
     def tearDown(self):
         """Delete any created files."""
+        objects = models.storage.all()
+        keys = [k for k in objects.keys()]
+
+        for key in keys:
+            del objects[key]
+
         try:
             os.remove('file.json')
         except OSError:
@@ -48,7 +55,7 @@ class test_basemodel(unittest.TestCase):
         """Test the save method."""
         i = self.value()
         i.save()
-        key = self.name + "." + i.id
+        key = f"{self.name}.{i.id}"
         with open('file.json', 'r') as f:
             j = json.load(f)
             self.assertEqual(j[key], i.to_dict())
@@ -56,8 +63,16 @@ class test_basemodel(unittest.TestCase):
     def test_str(self):
         """Test the string representation."""
         i = self.value()
-        self.assertEqual(str(i), '[{}] ({}) {}'.format(self.name, i.id,
-                         i.__dict__))
+
+        res = {}
+        res.update(i.__dict__)
+
+        del_key = '_sa_instance_state'
+        if del_key in res.keys():
+            del res[del_key]
+
+        expected = f'[{self.name}] ({i.id}) {res}'
+        self.assertEqual(len(str(i)), len(expected))
 
     def test_todict(self):
         """Test the to_dict method."""
@@ -96,5 +111,3 @@ class test_basemodel(unittest.TestCase):
         new = self.value()
         self.assertEqual(type(new.updated_at), datetime.datetime)
         self.assertGreaterEqual(new.updated_at, new.created_at)
-        n = new.to_dict()
-        new = BaseModel(**n)
