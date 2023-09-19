@@ -3,6 +3,8 @@
 import models
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy.orm import relationship
+from models.place import Place
 
 
 class City(BaseModel, Base):
@@ -22,3 +24,5 @@ class City(BaseModel, Base):
     else:
         state_id = ""
         name = ""
+
+    places = relationship("Places", cascade="all, delete", backref="cities")
