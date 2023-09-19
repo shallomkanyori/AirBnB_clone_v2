@@ -26,13 +26,16 @@ class TestConsoleBase(unittest.TestCase):
                   "** attribute name missing **", "** value missing **",
                   "*** Unknown syntax: "]
 
+    # BaseModel is not mapped in db storage, use State instead
+    default_cls = 'State' if models.storage_type == 'db' else 'BaseModel'
+
     def tearDown(self):
         """Delete any created files and clear objects dictionary."""
 
         objects = models.storage.all()
         keys = [k for k in objects.keys()]
         for key in keys:
-            del objects[key]
+            models.storage.delete(objects[key])
 
         try:
             os.remove("file.json")
@@ -165,7 +168,10 @@ class TestConsole_create(TestConsoleBase):
     def test_create(self):
         """Tests the create command."""
 
-        self.assert_output_create("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type != 'db':
+            self.assert_output_create("BaseModel")
+
         self.assert_output_create("User")
         self.assert_output_create("State")
         self.assert_output_create("City")
@@ -246,7 +252,10 @@ class TestConsole_create(TestConsoleBase):
     def test_create_params(self):
         """Test the create command with parameters"""
 
-        self.assert_output_create_params_types("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type != 'db':
+            self.assert_output_create_params_types("BaseModel")
+
         self.assert_output_create_params_types("User")
         self.assert_output_create_params_types("State")
         self.assert_output_create_params_types("City")
@@ -257,11 +266,11 @@ class TestConsole_create(TestConsoleBase):
     def test_create_params_multi(self):
         """Test the create command with multiple parameters."""
 
-        cmd = r'create BaseModel '
+        cmd = f'create {self.default_cls} '
         cmd += r'string="\"My_little_house\"" '
         cmd += r'flt=20.4 integer=9'
 
-        key = self.assert_output_create_gen('BaseModel', cmd)
+        key = self.assert_output_create_gen(self.default_cls, cmd)
         obj = models.storage.all()[key]
 
         self.assertEqual(obj.string, '"My little house"')
@@ -271,38 +280,38 @@ class TestConsole_create(TestConsoleBase):
     def test_create_params_invalid(self):
         """Ensure the create command skips parameters that don't fit."""
 
-        cmd = 'create BaseModel string1=string'
-        key = self.assert_output_create_gen('BaseModel', cmd)
+        cmd = f'create {self.default_cls} string1=string'
+        key = self.assert_output_create_gen(self.default_cls, cmd)
         obj = models.storage.all()[key]
         self.assertFalse(hasattr(obj, 'string1'))
 
-        cmd = 'create BaseModel string2="s p a c e s"'
-        key = self.assert_output_create_gen('BaseModel', cmd)
+        cmd = f'create {self.default_cls} string2="s p a c e s"'
+        key = self.assert_output_create_gen(self.default_cls, cmd)
         obj = models.storage.all()[key]
         self.assertFalse(hasattr(obj, 'string2'))
 
-        cmd = 'create BaseModel string3="quot"es"'
-        key = self.assert_output_create_gen('BaseModel', cmd)
+        cmd = f'create {self.default_cls} string3="quot"es"'
+        key = self.assert_output_create_gen(self.default_cls, cmd)
         obj = models.storage.all()[key]
         self.assertFalse(hasattr(obj, 'string3'))
 
-        cmd = 'create BaseModel flt=20.4.5'
-        key = self.assert_output_create_gen('BaseModel', cmd)
+        cmd = f'create {self.default_cls} flt=20.4.5'
+        key = self.assert_output_create_gen(self.default_cls, cmd)
         obj = models.storage.all()[key]
         self.assertFalse(hasattr(obj, 'flt'))
 
-        cmd = 'create BaseModel integer=--20'
-        key = self.assert_output_create_gen('BaseModel', cmd)
+        cmd = f'create {self.default_cls} integer=--20'
+        key = self.assert_output_create_gen(self.default_cls, cmd)
         obj = models.storage.all()[key]
         self.assertFalse(hasattr(obj, 'integer'))
 
-        cmd = 'create BaseModel other=["list"]'
-        key = self.assert_output_create_gen('BaseModel', cmd)
+        cmd = f'create {self.default_cls} other=["list"]'
+        key = self.assert_output_create_gen(self.default_cls, cmd)
         obj = models.storage.all()[key]
         self.assertFalse(hasattr(obj, 'other'))
 
-        cmd = 'create BaseModel other={dict: "val"}'
-        key = self.assert_output_create_gen('BaseModel', cmd)
+        cmd = f'create {self.default_cls} other={{dict: "val"}}'
+        key = self.assert_output_create_gen(self.default_cls, cmd)
         obj = models.storage.all()[key]
         self.assertFalse(hasattr(obj, 'other'))
 
@@ -334,7 +343,10 @@ class TestConsole_count(TestConsoleBase):
     def test_count(self):
         """Tets the .count() method."""
 
-        self.assert_output_count("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type != 'db':
+            self.assert_output_count("BaseModel")
+
         self.assert_output_count("User")
         self.assert_output_count("State")
         self.assert_output_count("City")
@@ -379,7 +391,10 @@ class TestConsole_show(TestConsoleBase):
     def test_show(self):
         """Tests the show command."""
 
-        self.assert_output_show("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type != 'db':
+            self.assert_output_show("BaseModel")
+
         self.assert_output_show("User")
         self.assert_output_show("State")
         self.assert_output_show("City")
@@ -396,19 +411,19 @@ class TestConsole_show(TestConsoleBase):
         res = self.get_output("show MyModel")
         self.assertEqual(res, self.error_msgs[1])
 
-        res = self.get_output("show BaseModel")
+        res = self.get_output(f"show {self.default_cls}")
         self.assertEqual(res, self.error_msgs[2])
 
-        res = self.get_output("show BaseModel 123")
+        res = self.get_output(f"show {self.default_cls} 123")
         self.assertEqual(res, self.error_msgs[3])
 
     def test_show_extra_args(self):
         """Make sure any other arguments to the show command are ignored."""
 
-        b = BaseModel()
+        b = eval(self.default_cls)()
         b.save()
 
-        cmd = f"show BaseModel {b.id} other arguments"
+        cmd = f"show {self.default_cls} {b.id} other arguments"
         res = self.get_output(cmd)
         self.assertEqual(res, str(b))
 
@@ -431,7 +446,10 @@ class TestConsole_show(TestConsoleBase):
     def test_show_dot(self):
         """Tests the .show() command"""
 
-        self.assert_output_show_dot("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type != 'db':
+            self.assert_output_show_dot("BaseModel")
+
         self.assert_output_show_dot("User")
         self.assert_output_show_dot("State")
         self.assert_output_show_dot("City")
@@ -448,19 +466,19 @@ class TestConsole_show(TestConsoleBase):
         res = self.get_output("MyModel.show()")
         self.assertEqual(res, self.error_msgs[1])
 
-        res = self.get_output("BaseModel.show()")
+        res = self.get_output(f"{self.default_cls}.show()")
         self.assertEqual(res, self.error_msgs[2])
 
-        res = self.get_output("BaseModel.show(123)")
+        res = self.get_output(f"{self.default_cls}.show(123)")
         self.assertEqual(res, self.error_msgs[3])
 
     def test_show_dot_extra_args(self):
         """Make sure any other arguments to the .show() command are ignored."""
 
-        b = BaseModel()
+        b = eval(self.default_cls)()
         b.save()
 
-        cmd_str = f"BaseModel.show({b.id}, other, arguments)"
+        cmd_str = f"{self.default_cls}.show({b.id}, other, arguments)"
         res = self.get_output(cmd_str)
         self.assertEqual(res, str(b))
 
@@ -487,7 +505,10 @@ class TestConsole_destroy(TestConsoleBase):
     def test_destroy(self):
         """Tests the destroy command."""
 
-        self.assert_output_destroy("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type != 'db':
+            self.assert_output_destroy("BaseModel")
+
         self.assert_output_destroy("User")
         self.assert_output_destroy("State")
         self.assert_output_destroy("City")
@@ -504,22 +525,22 @@ class TestConsole_destroy(TestConsoleBase):
         res = self.get_output("destroy MyModel")
         self.assertEqual(res, self.error_msgs[1])
 
-        res = self.get_output("destroy BaseModel")
+        res = self.get_output(f"destroy {self.default_cls}")
         self.assertEqual(res, self.error_msgs[2])
 
-        res = self.get_output("destroy BaseModel 123")
+        res = self.get_output(f"destroy {self.default_cls} 123")
         self.assertEqual(res, self.error_msgs[3])
 
     def test_destroy_extra_args(self):
         """Make sure any other arguments to the destroy command are ignored."""
 
-        b = BaseModel()
+        b = eval(self.default_cls)()
         b.save()
 
-        cmd = f"destroy BaseModel {b.id} other arguments"
+        cmd = f"destroy {self.default_cls} {b.id} other arguments"
         res = self.get_output(cmd)
         self.assertEqual(res, "")
-        key = f"BaseModel.{b.id}"
+        key = f"{self.default_cls}.{b.id}"
         self.assertNotIn(key, models.storage.all())
 
     def assert_output_destroy_dot(self, cls):
@@ -541,7 +562,10 @@ class TestConsole_destroy(TestConsoleBase):
     def test_destroy_dot(self):
         """Tests the .destroy() command"""
 
-        self.assert_output_destroy_dot("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type != 'db':
+            self.assert_output_destroy_dot("BaseModel")
+
         self.assert_output_destroy_dot("User")
         self.assert_output_destroy_dot("State")
         self.assert_output_destroy_dot("City")
@@ -561,10 +585,10 @@ class TestConsole_destroy(TestConsoleBase):
         res = self.get_output("MyModel.destroy()")
         self.assertEqual(res, self.error_msgs[1])
 
-        res = self.get_output("BaseModel.destroy()")
+        res = self.get_output(f"{self.default_cls}.destroy()")
         self.assertEqual(res, self.error_msgs[2])
 
-        res = self.get_output("BaseModel.destroy(123)")
+        res = self.get_output(f"{self.default_cls}.destroy(123)")
         self.assertEqual(res, self.error_msgs[3])
 
     def test_destroy_dot_extra_args(self):
@@ -572,13 +596,13 @@ class TestConsole_destroy(TestConsoleBase):
         Make sure any other arguments to the .destroy() command are ignored.
         """
 
-        b = BaseModel()
+        b = eval(self.default_cls)()
         b.save()
 
-        cmd = f"BaseModel.destroy({b.id}, other, arguments)"
+        cmd = f"{self.default_cls}.destroy({b.id}, other, arguments)"
         res = self.get_output(cmd)
         self.assertEqual(res, "")
-        key = f"BaseModel.{b.id}"
+        key = f"{self.default_cls}.{b.id}"
         self.assertNotIn(key, models.storage.all())
 
 
@@ -592,9 +616,8 @@ class TestConsole_all(TestConsoleBase):
             cls: the name of the class to print all instances of.
         """
 
-        objects = models.storage.all()
-        obj_ids = [obj.id for obj in objects.values()
-                   if obj.__class__.__name__ == cls]
+        objects = models.storage.all(cls)
+        obj_ids = [obj.id for obj in objects.values()]
 
         cmd = f"all {cls}"
         res = self.get_output(cmd)
@@ -623,7 +646,10 @@ class TestConsole_all(TestConsoleBase):
         no_arg_res = self.get_output("all")
         self.assertEqual(no_arg_res, "[]")
 
-        self.assert_output_all_cls("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type != 'db':
+            self.assert_output_all_cls("BaseModel")
+
         self.assert_output_all_cls("User")
         self.assert_output_all_cls("State")
         self.assert_output_all_cls("City")
@@ -645,7 +671,7 @@ class TestConsole_all(TestConsoleBase):
         res = self.get_output("all MyModel")
         self.assertEqual(res, self.error_msgs[1])
 
-        res = self.get_output("all BaseModel other arguments")
+        res = self.get_output(f"all {self.default_cls} other arguments")
         self.assertEqual(res, self.error_msgs[1])
 
     def assert_output_all_dot_one(self, cls):
@@ -664,7 +690,10 @@ class TestConsole_all(TestConsoleBase):
     def test_all_dot(self):
         """Tests the .all() command"""
 
-        self.assert_output_all_dot_one("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type != 'db':
+            self.assert_output_all_dot_one("BaseModel")
+
         self.assert_output_all_dot_one("User")
         self.assert_output_all_dot_one("State")
         self.assert_output_all_dot_one("City")
@@ -684,7 +713,8 @@ class TestConsole_all(TestConsoleBase):
         res = self.get_output("MyModel.all()")
         self.assertEqual(res, self.error_msgs[1])
 
-        res = self.get_output("BaseModel.all(other, arguments)")
+        res = self.get_output(f"{self.default_cls}.all(other, arguments)")
+
         self.assertEqual(res, self.error_msgs[1])
 
 
@@ -791,7 +821,10 @@ class TestConsole_update(TestConsoleBase):
     def test_update(self):
         """Tests the update command."""
 
-        self.assert_output_update_types("BaseModel")
+        # BaseModel is not mapped in db storage
+        if models.storage_type == 'db':
+            self.assert_output_update_types("BaseModel")
+
         self.assert_output_update_types("User")
         self.assert_output_update_types("State")
         self.assert_output_update_types("City")
@@ -808,36 +841,37 @@ class TestConsole_update(TestConsoleBase):
         res = self.get_output("update MyModel")
         self.assertEqual(res, self.error_msgs[1])
 
-        res = self.get_output("update BaseModel")
+        res = self.get_output(f"update {self.default_cls}")
         self.assertEqual(res, self.error_msgs[2])
 
-        res = self.get_output("update BaseModel 123")
+        res = self.get_output(f"update {self.default_cls} 123")
         self.assertEqual(res, self.error_msgs[3])
 
-        b = BaseModel()
+        b = eval(self.default_cls)()
         b.save()
-        cmd = f"update BaseModel {b.id}"
+        cmd = f"update {self.default_cls} {b.id}"
         res = self.get_output(cmd)
         self.assertEqual(res, self.error_msgs[4])
 
-        cmd = f"update BaseModel {b.id} attr"
+        cmd = f"update {self.default_cls} {b.id} attr"
         res = self.get_output(cmd)
         self.assertEqual(res, self.error_msgs[5])
 
     def test_update_extra_args(self):
         """Make sure any other arguments to the update command are ignored."""
 
-        b = BaseModel()
+        b = eval(self.default_cls)()
         b.save()
 
         attr = "attr"
         attr_val = 89
 
-        cmd = f"update BaseModel {b.id} {attr} {attr_val} other arguments"
+        cmd = (f"update {self.default_cls} {b.id} {attr} {attr_val}"
+               + " other arguments")
         res = self.get_output(cmd)
         self.assertEqual(res, "")
 
-        key = f"BaseModel.{b.id}"
+        key = f"{self.default_cls}.{b.id}"
         objects = models.storage.all()
         self.assertIn(key, models.storage.all())
 
@@ -854,27 +888,27 @@ class TestConsole_update(TestConsoleBase):
         res = self.get_output("MyModel.update()")
         self.assertEqual(res, self.error_msgs[1])
 
-        res = self.get_output("BaseModel.update()")
+        res = self.get_output(f"{self.default_cls}.update()")
         self.assertEqual(res, self.error_msgs[2])
 
-        res = self.get_output("BaseModel.update(123)")
+        res = self.get_output(f"{self.default_cls}.update(123)")
         self.assertEqual(res, self.error_msgs[3])
 
-        b = BaseModel()
+        b = eval(self.default_cls)()
         b.save()
-        cmd = f"BaseModel.update({b.id})"
+        cmd = f"{self.default_cls}.update({b.id})"
         res = self.get_output(cmd)
         self.assertEqual(res, self.error_msgs[4])
 
-        cmd = f'BaseModel.update({b.id}, "attr")'
+        cmd = f'{self.default_cls}.update({b.id}, "attr")'
         res = self.get_output(cmd)
         self.assertEqual(res, self.error_msgs[5])
 
-        cmd = f"BaseModel.update({b.id}, {{}})"
+        cmd = f"{self.default_cls}.update({b.id}, {{}})"
         res = self.get_output(cmd)
         self.assertEqual(res, self.error_msgs[4])
 
-        cmd = f'BaseModel.update({b.id}, {{"attr": ""}})'
+        cmd = f'{self.default_cls}.update({b.id}, {{"attr": ""}})'
         res = self.get_output(cmd)
         self.assertEqual(res, self.error_msgs[5])
 
@@ -882,17 +916,18 @@ class TestConsole_update(TestConsoleBase):
         """Make sure any other arguments to the .update() command are ignored.
         """
 
-        b = BaseModel()
+        b = eval(self.default_cls)()
         b.save()
 
         attr = "attr"
         attr_val = 89
 
-        cmd = f"BaseModel.update({b.id}, {attr}, {attr_val}, other, arguments)"
+        cmd = (f"{self.default_cls}.update({b.id}, {attr}, {attr_val},"
+               + " other, arguments)")
         res = self.get_output(cmd)
         self.assertEqual(res, "")
 
-        key = f"BaseModel.{b.id}"
+        key = f"{self.default_cls}.{b.id}"
         objects = models.storage.all()
         self.assertIn(key, models.storage.all())
 

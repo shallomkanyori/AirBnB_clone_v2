@@ -183,7 +183,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_show(self, args):
         """ Method to show an individual object """
-        args = args.split(' ')
+        args = args.strip().split(' ')
         c_name = args[0] if len(args) > 0 else ""
         c_id = args[1] if len(args) > 1 else ""
 
@@ -214,7 +214,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_destroy(self, args):
         """ Destroys a specified object """
-        args = args.split(' ')
+        args = args.strip().split(' ')
         c_name = args[0] if len(args) > 0 else ""
         c_id = args[1] if len(args) > 1 else ""
 
@@ -267,10 +267,14 @@ class HBNBCommand(cmd.Cmd):
 
     def do_count(self, args):
         """Count current number of class instances."""
+        args = args.strip()
+        args = args if args else None
         count = 0
+
         for k, v in models.storage.all().items():
             if args == k.split('.')[0]:
                 count += 1
+
         print(count)
 
     def help_count(self):
