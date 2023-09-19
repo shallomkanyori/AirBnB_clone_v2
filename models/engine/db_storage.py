@@ -48,8 +48,7 @@ class DBStorage:
             res = self.__session.query(cls).all()
 
         else:
-            # all_cls = [User, State, City, Amenity, Place, Review]
-            all_cls = [User, State, City, Place, Review]
+            all_cls = [User, State, City, Place, Review, Amenity]
             res = []
 
             for cls in all_cls:
