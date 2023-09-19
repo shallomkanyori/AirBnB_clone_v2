@@ -49,7 +49,7 @@ class DBStorage:
 
         else:
             # all_cls = [User, State, City, Amenity, Place, Review]
-            all_cls = [State, City]
+            all_cls = [User, State, City, Place, Review]
             res = []
 
             for cls in all_cls:
