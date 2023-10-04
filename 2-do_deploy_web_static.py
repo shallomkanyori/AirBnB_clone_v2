@@ -1,8 +1,5 @@
 #!/usr/bin/python3
-"""This module is a fabfile.
-
-    Functions:
-        do_deploy
+"""This module is a fabfile that distributes an archive to web servers.
 """
 import os
 from fabric.api import put, run, env
@@ -21,39 +18,32 @@ def do_deploy(archive_path):
         Otherwise, returns False.
     """
 
-    if not os.path.exists(archive_path):
+    if not os.path.isfile(archive_path):
         return False
 
-    fext = archive_path[archive_path.rfind('/') + 1:]
-    fname = fext[:fext.rfind('.')]
-    rem_path = f"/data/web_static/releases/{fname}"
+    f = archive_path.split('/')[-1]
+    fname = f.split('.')[0]
+    path = "/data/web_static/releases/{}/".format(fname)
 
-    # upload file
-    if put(archive_path, f"/tmp/{fext}").failed:
+    try:
+        # upload file
+        put(archive_path, "/tmp/{}".format(f))
+
+        # unpack files
+        run("mkdir -p {}".format(path))
+        run("tar -xzf /tmp/{} -C {}".format(f, path))
+
+        # remove extra directories
+        run("rm /tmp/{}".format(f))
+
+        run("mv {}web_static/* {}".format(path, path))
+
+        run("rm -rf {}web_static".format(path))
+
+        # update symlink
+        run("rm -rf /data/web_static/current")
+        run("ln -s {} /data/web_static/current".format(path))
+        print("New version deployed!")
+        return True
+    except Exception:
         return False
-
-    # unpack files
-    if run(f"mkdir -p {rem_path}").failed:
-        return False
-
-    if run(f"tar -xzf /tmp/{fext} -C {rem_path}").failed:
-        return False
-
-    # remove extra directories
-    if run(f"rm /tmp/{fext}").failed:
-        return False
-
-    if run(f"mv {rem_path}/web_static/* {rem_path}/").failed:
-        return False
-
-    if run(f"rm -rf {rem_path}/web_static").failed:
-        return False
-
-    # update symlink
-    if run("rm -rf /data/web_static/current").failed:
-        return False
-
-    if run(f"ln -s {rem_path} /data/web_static/current").failed:
-        return False
-
-    return True
