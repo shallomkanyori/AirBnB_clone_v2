@@ -5,7 +5,7 @@
         do_deploy
 """
 import os
-from fabric.api import put, run, settings, env
+from fabric.api import put, run, env
 
 env.hosts = ['52.3.241.19', '54.237.48.59']
 
@@ -29,7 +29,7 @@ def do_deploy(archive_path):
     rem_path = f"/data/web_static/releases/{fname}"
 
     # upload file
-    if put(archive_path, f"/tmp{fext}").failed:
+    if put(archive_path, f"/tmp/{fext}").failed:
         return False
 
     # unpack files
