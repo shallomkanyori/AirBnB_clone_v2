@@ -24,26 +24,36 @@ def do_deploy(archive_path):
     if not os.path.exists(archive_path):
         return False
 
-    with settings(abort_exception=Exception):
-        try:
-            fext = archive_path[archive_path.rfind('/') + 1:]
-            fname = fext[:fext.rfind('.')]
-            rem_path = f"/data/web_static/releases/{fname}"
+    fext = archive_path[archive_path.rfind('/') + 1:]
+    fname = fext[:fext.rfind('.')]
+    rem_path = f"/data/web_static/releases/{fname}"
 
-            put(archive_path, "/tmp")
+    # upload file
+    if put(archive_path, "/tmp").failed:
+        return False
 
-            run(f"mkdir -p  {rem_path}")
-            run(f"tar -xzf /tmp/{fext} -C {rem_path}")
+    # unpack files
+    if run(f"mkdir -p  {rem_path}").failed:
+        return False
 
-            run(f"rm /tmp/{fext}")
+    if run(f"tar -xzf /tmp/{fext} -C {rem_path}").failed:
+        return False
 
-            run(f"mv {rem_path}/web_static/* {rem_path}")
-            run(f"rm -rf {rem_path}/web_static")
+    # remove extra directories
+    if run(f"rm /tmp/{fext}").failed:
+        return False
 
-            run("rm -rf /data/web_static/current")
-            run(f"ln -s {rem_path} /data/web_static/current")
+    if run(f"mv {rem_path}/web_static/* {rem_path}").failed:
+        return False
 
-        except Exception:
-            return False
+    if run(f"rm -rf {rem_path}/web_static").failed:
+        return False
+
+    # update symlink
+    if run("rm -rf /data/web_static/current").failed:
+        return False
+
+    if run(f"ln -s {rem_path} /data/web_static/current").failed:
+        return False
 
     return True
