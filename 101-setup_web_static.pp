@@ -11,7 +11,7 @@ exec {'update':
 exec {'nginx':
   command  => 'sudo apt-get -y install nginx',
   provider => shell,
-  before   => Exec['folders'],
+  before   => Exec['folders1'],
 }
 
 # Create relevant folders
