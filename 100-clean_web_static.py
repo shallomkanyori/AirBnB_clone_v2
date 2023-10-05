@@ -16,7 +16,7 @@ def clean_local(number):
     arcs = local("ls -t versions/web_static_*", capture=True).split()
 
     for i in range(number, len(arcs)):
-        local(f"rm {arcs[i]}")
+        local("rm {}".format(arcs[i]))
 
 
 def clean_remote(number):
@@ -29,7 +29,7 @@ def clean_remote(number):
     arcs = run("ls -dt /data/web_static/releases/web_static_*").split()
 
     for i in range(number, len(arcs)):
-        run(f"rm -r {arcs[i]}")
+        run("rm -r {}".format(arcs[i]))
 
 
 def do_clean(number=0):

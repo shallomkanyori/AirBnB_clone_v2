@@ -18,8 +18,10 @@ arch_path = None
 def do_pack():
     """Generates a .tgz archive from ./web_static/ directory."""
     d = datetime.now()
-    filepath = "versions/web_static_"
-    filepath += f"{d.year}{d.month}{d.day}{d.hour}{d.minute}{d.second}.tgz"
+    filepath = "versions/web_static_{}{}{}{}{}{}.tgz".format(d.year, d.month,
+                                                             d.day, d.hour,
+                                                             d.minute,
+                                                             d.second)
 
     local("mkdir -p versions")
     cmd = f"tar -cvzf {filepath} web_static"
@@ -70,6 +72,7 @@ def do_deploy(archive_path):
         run("ln -s {} /data/web_static/current".format(path))
         print("New version deployed!")
         return True
+
     except Exception:
         return False
 
