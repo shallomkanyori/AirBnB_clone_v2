@@ -7,12 +7,14 @@
         deploy
 """
 import os
-from fabric.api import put, run, env, local
+from fabric.api import *
 from datetime import datetime
 
 env.hosts = ['52.3.241.19', '54.237.48.59']
+arch_path = None
 
 
+@runs_once
 def do_pack():
     """Generates a .tgz archive from ./web_static/ directory."""
     d = datetime.now()
@@ -80,9 +82,9 @@ def deploy():
         Otherwise, returns False.
     """
 
-    archive_path = do_pack()
+    arch_path = do_pack()
 
-    if not archive_path:
+    if not arch_path:
         return False
 
-    return do_deploy(archive_path)
+    return do_deploy(arch_path)
