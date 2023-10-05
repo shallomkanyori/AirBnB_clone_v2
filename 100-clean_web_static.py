@@ -39,11 +39,7 @@ def do_clean(number=0):
         number (int): the number of archives to keep
     """
 
-    try:
-        number = int(number)
-    except ValueError as e:
-        print("Error: Invalid number")
-        return
+    number = int(number)
     number = 1 if number <= 0 else number
 
     clean_local(number)
