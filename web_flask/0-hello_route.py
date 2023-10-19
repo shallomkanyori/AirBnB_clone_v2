@@ -9,3 +9,7 @@ app = Flask(__name__)
 def index():
     """The index page."""
     return "Hello HBNB!"
+
+
+if __name__ == "__main__":
+    app.run()
