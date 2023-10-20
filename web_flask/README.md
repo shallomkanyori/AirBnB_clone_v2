@@ -121,3 +121,21 @@ Update DBStorage: ([../models/engine/db_storage.py](../models/engine/db_storage.
 				- `LI` tag: description of one `City`: `<city.id>: <B><city.name></B>`i
 		- Otherwise:
 			- `H1` tag: "Not found!"
+
+#### Task 11
+[10-hbnb_filters.py](10-hbnb_filters.py) is a Python script that starts a Flask web application:
+- Uses `storage` for fetching data from the storage engine (`FileStorage` or `DBStorage`)
+- To load all cities of a `State`:
+	- If the storage engine is DBStorage, uses `cities` relationship
+	- Otherwise, uses the public getter method `cities`
+- After each request, removes the current SQLAlchemy Session:
+	- Declares a method to handle `@app.teardown_appcontext`
+	- Calls in this method `storage.close()`
+- Routes:
+	- `/hbnb_filters`: displays a HTML page like `6-index.html`
+		- Copy files `3-footer.css`, `3-header.css`, `4-common.css` and `6-filters.css` to web_flask/static/styles
+		- Copy files `icon.png` and `logo.png` to `web_flask/static/images`
+		- Update .popover class in `6-filters.css` to allow scrolling in the popover and a max height of 300 pixels.
+		- Use `6-index.html` content as source code for the template [10-hbnb_filters.html](templates/10-hbnb_filters.html):
+		- Replace the content of the `H4` tag under each filter title (`H3` States and `H3` Amenities) by `&nbsp;`
+		- `State`, `City` and `Amenity` objects must be loaded from DBStorage and sorted by name (A->Z)
