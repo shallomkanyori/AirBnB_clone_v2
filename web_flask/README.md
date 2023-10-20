@@ -26,3 +26,13 @@
 	- `/c/<text>`: displays “C ” followed by the value of the `text` variable (replace underscore `_` symbols with a space ` `)
 	- `/python/<text>`: displays “Python ”, followed by the value of the `text` variable (replace underscore `_` symbols with a space ` `)
 		- The default value of `text` is “is cool”
+
+#### Task 4
+[4-number_route.py](4-number_route.py) is a Python script that starts a Flask web application:
+- Routes:
+	- `/`: displays "Hello HBNB!"
+	- `/hbnb`: displays “HBNB”
+	- `/c/<text>`: displays “C ” followed by the value of the `text` variable (replace underscore `_` symbols with a space ` `)
+	- `/python/<text>`: displays “Python ”, followed by the value of the `text` variable (replace underscore `_` symbols with a space ` `)
+		- The default value of `text` is “is cool”
+	- `/number/<n>`: displays “`n` is a number” only if `n` is an integer
