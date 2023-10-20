@@ -10,3 +10,10 @@
 - Routes:
 	- `/`: displays "Hello HBNB!"
 	- `/hbnb`: displays “HBNB”
+
+#### Task 2
+[2-c_route.py](2-c_route.py) is a Python script that starts a Flask web application:
+- Routes:
+	- `/`: displays "Hello HBNB!"
+	- `/hbnb`: displays “HBNB”
+	- `/c/<text>`: displays “C ” followed by the value of the `text` variable (replace underscore `_` symbols with a space ` `)
