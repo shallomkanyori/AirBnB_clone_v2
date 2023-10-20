@@ -88,7 +88,8 @@ class HBNBCommand(cmd.Cmd):
 
                 args = ' '.join(args)
 
-                line = f"{method} {cls_name} {args}"
+                # line = f"{method} {cls_name} {args}"
+                line = "{} {} {}".format(method, cls_name, args)
 
                 return self.onecmd(line)
 
@@ -187,7 +188,7 @@ class HBNBCommand(cmd.Cmd):
         c_name = args[0] if len(args) > 0 else ""
         c_id = args[1] if len(args) > 1 else ""
 
-        key = f"{c_name}.{c_id}"
+        key = "{}.{}".format(c_name, c_id)
         objects = models.storage.all()
 
         if not c_name:
@@ -218,7 +219,7 @@ class HBNBCommand(cmd.Cmd):
         c_name = args[0] if len(args) > 0 else ""
         c_id = args[1] if len(args) > 1 else ""
 
-        key = f"{c_name}.{c_id}"
+        key = "{}.{}".format(c_name, c_id)
         objects = models.storage.all()
 
         if not c_name:
@@ -301,7 +302,7 @@ class HBNBCommand(cmd.Cmd):
             print("** instance id missing **")
             return
 
-        key = f"{c_name}.{c_id}"
+        key = "{}.{}".format(c_name, c_id)
         objects = models.storage.all()
 
         if key not in objects:

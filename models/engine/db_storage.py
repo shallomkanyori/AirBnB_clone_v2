@@ -54,7 +54,8 @@ class DBStorage:
             for cls in all_cls:
                 res.extend(self.__session.query(cls).all())
 
-        res = {f"{o.__class__.__name__}.{o.id}": o for o in res}
+        res = {"{}.{}".format(o.__class__.__name__, o.id): o for o in res}
+        # res = {f"{o.__class__.__name__}.{o.id}": o for o in res}
         return res
 
     def new(self, obj):

@@ -57,7 +57,7 @@ class BaseModel:
         if del_key in res.keys():
             del res[del_key]
 
-        return f"[{type(self).__name__}] ({self.id}) {res}"
+        return "[{}] ({}) {}".format(type(self).__name__, self.id, res)
 
     def save(self):
         """Updates update_at and saves the instance to storage."""
