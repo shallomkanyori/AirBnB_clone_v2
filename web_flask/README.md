@@ -60,13 +60,25 @@
 	- `/number/<n>`: displays “`n` is a number” only if `n` is an integer
 	- `/number_template/<n>`: displays a HTML page, [templates/5-number.html](templates/5-number.html), only if `n` is an integer:
 		- `H1` tag: “Number: `n`” inside the tag BODY
-	- `/number_odd_or_even/<n>`: displays a HTML page only if `n` is an integer:
+	- `/number_odd_or_even/<n>`: displays a HTML page, [templates/6-number_odd_or_even.html](templates/6-number_odd_or_even.html), only if `n` is an integer:
 		- `H1` tag: “Number: `n` is `even|odd`” inside the tag `BODY`
 
 #### Task 7
 Update some parts of the storage engine:
 
-Update FileStorage: ([models/engine/file_storage.py](models/engine/file_storage.py))
+Update FileStorage: ([../models/engine/file_storage.py](../models/engine/file_storage.py))
 - Added public method `def close(self):`: calls `reload()` method for deserializing the JSON file to objects
-Update DBStorage: ([models/engine/db_storage.py](models/engine/db_storage.py))
+Update DBStorage: ([../models/engine/db_storage.py](../models/engine/db_storage.py))
 - Added public method `def close(self):`: call `remove()` method on the private session attribute (`self.__session`)
+
+#### Task 8
+[7-states_list.py](7-states_list.py) a script that starts a Flask web application:
+- Uses `storage` for fetching data from the storage engine (`FileStorage` or `DBStorage`)
+- After each request, removes the current SQLAlchemy Session:
+	- Declares a method to handle `@app.teardown_appcontext`
+	- Calls in this method `storage.close()`
+- Routes:
+	- `/states_list`: displays a HTML page, [templates/7-states_list.html](templates/7-states_list.html): (inside the tag `BODY`)
+		- `H1` tag: “States”
+		- `UL` tag: with the list of all `State` objects present in `DBStorage` sorted by `name` (A->Z)
+			- `LI` tag: description of one `State`: `<state.id>: <B><state.name></B>`
