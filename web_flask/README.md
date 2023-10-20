@@ -72,7 +72,7 @@ Update DBStorage: ([../models/engine/db_storage.py](../models/engine/db_storage.
 - Added public method `def close(self):`: call `remove()` method on the private session attribute (`self.__session`)
 
 #### Task 8
-[7-states_list.py](7-states_list.py) a script that starts a Flask web application:
+[7-states_list.py](7-states_list.py) is a script that starts a Flask web application:
 - Uses `storage` for fetching data from the storage engine (`FileStorage` or `DBStorage`)
 - After each request, removes the current SQLAlchemy Session:
 	- Declares a method to handle `@app.teardown_appcontext`
@@ -82,3 +82,19 @@ Update DBStorage: ([../models/engine/db_storage.py](../models/engine/db_storage.
 		- `H1` tag: “States”
 		- `UL` tag: with the list of all `State` objects present in `DBStorage` sorted by `name` (A->Z)
 			- `LI` tag: description of one `State`: `<state.id>: <B><state.name></B>`
+
+#### Task 9
+[8-cities_by_states.py](8-cities_by_states.py) is a script that starts a Flask web application:
+- Uses `storage` for fetching data from the storage engine (`FileStorage` or `DBStorage`)
+- To load all cities of a `State`:
+	- If the storage engine is DBStorage, uses `cities` relationship
+	- Otherwise, uses the public getter method `cities`
+- After each request, removes the current SQLAlchemy Session:
+	- Declares a method to handle `@app.teardown_appcontext`
+	- Calls in this method `storage.close()`
+- Routes:
+	- `/cities_by_states`: displays a HTML page, [templates/8-cities_by_states.html](templates/8-cities_by_states.html): (inside the tag `BODY`)
+		- `H1` tag: “States”
+		- `UL` tag: with the list of all `State` objects present in `DBStorage` sorted by `name` (A->Z)
+			- `LI` tag: description of one `State`: `<state.id>: <B><state.name></B>` + `UL` tag: with the list of `City` objects linked to the `State` sorted by `name` (A->Z)
+				- `LI` tag: description of one `City`: `<city.id>: <B><city.name></B>`
