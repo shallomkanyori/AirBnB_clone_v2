@@ -42,7 +42,7 @@ def pyroute(text="is cool"):
     return "Python {}".format(text)
 
 
-@app.route('number/<int:n>', strict_slashes=False)
+@app.route('/number/<int:n>', strict_slashes=False)
 def nroute(n):
     """The /number/<n> route.
 
