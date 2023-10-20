@@ -98,3 +98,26 @@ Update DBStorage: ([../models/engine/db_storage.py](../models/engine/db_storage.
 		- `UL` tag: with the list of all `State` objects present in `DBStorage` sorted by `name` (A->Z)
 			- `LI` tag: description of one `State`: `<state.id>: <B><state.name></B>` + `UL` tag: with the list of `City` objects linked to the `State` sorted by `name` (A->Z)
 				- `LI` tag: description of one `City`: `<city.id>: <B><city.name></B>`
+
+#### Task 10
+[9-states.py](9-states.py) is a script that starts a Flask web application:
+- Uses `storage` for fetching data from the storage engine (`FileStorage` or `DBStorage`)
+- To load all cities of a `State`:
+	- If the storage engine is DBStorage, uses `cities` relationship
+	- Otherwise, uses the public getter method `cities`
+- After each request, removes the current SQLAlchemy Session:
+	- Declares a method to handle `@app.teardown_appcontext`
+	- Calls in this method `storage.close()`
+- Routes:
+	- `/states`: displays a HTML page, [templates/9-states.html](templates/9-states.html): (inside the tag `BODY`)
+		- `H1` tag: “States”
+		- `UL` tag: with the list of all `State` objects present in `DBStorage` sorted by `name` (A->Z)
+			- `LI` tag: description of one `State`: `<state.id>: <B><state.name></B>`
+	- `/states/<id>`: display a HTML page: (inside the tag `BODY`)
+		- If a `State` object is found with this `id`:
+			- `H1` tag: “State: ”
+			- `H3` tag: “Cities:”
+			- `UL` tag: with the list of `City` objects linked to the `State`     sorted by `name` (A->Z)
+				- `LI` tag: description of one `City`: `<city.id>: <B><city.name></B>`i
+		- Otherwise:
+			- `H1` tag: "Not found!"
