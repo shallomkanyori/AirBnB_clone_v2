@@ -21,7 +21,7 @@ def states(id=None):
     if id:
         key = "State.{}".format(id)
         state = states.get(key)
-        return render_template('0-states.html', states=None, state=state)
+        return render_template('9-states.html', states=None, state=state)
 
     states = states.values()
     return render_template('9-states.html', states=states, state=None)
