@@ -36,3 +36,15 @@
 	- `/python/<text>`: displays “Python ”, followed by the value of the `text` variable (replace underscore `_` symbols with a space ` `)
 		- The default value of `text` is “is cool”
 	- `/number/<n>`: displays “`n` is a number” only if `n` is an integer
+
+#### Task 5
+[5-number_template.py](5-number_template.py) is a Python script that starts a Flask web application:
+- Routes:
+	- `/`: displays "Hello HBNB!"
+	- `/hbnb`: displays “HBNB”
+	- `/c/<text>`: displays “C ” followed by the value of the `text` variable (replace underscore `_` symbols with a space ` `)
+	- `/python/<text>`: displays “Python ”, followed by the value of the `text` variable (replace underscore `_` symbols with a space ` `)
+		- The default value of `text` is “is cool”
+	- `/number/<n>`: displays “`n` is a number” only if `n` is an integer
+	- `/number_template/<n>`: displays a HTML page, [templates/5-number.html](templates/5-number.html), only if `n` is an integer:
+		- `H1` tag: “Number: `n`” inside the tag BODY
