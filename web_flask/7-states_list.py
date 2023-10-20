@@ -14,8 +14,12 @@ def states():
 
 
 @app.teardown_appcontext
-def clean():
-    """Remove the current SQLAlchemy Session."""
+def clean(exc):
+    """Remove the current SQLAlchemy Session.
+
+    Args:
+        exc : Error.
+    """
     storage.close()
 
 
