@@ -62,3 +62,11 @@
 		- `H1` tag: “Number: `n`” inside the tag BODY
 	- `/number_odd_or_even/<n>`: displays a HTML page only if `n` is an integer:
 		- `H1` tag: “Number: `n` is `even|odd`” inside the tag `BODY`
+
+#### Task 7
+Update some parts of the storage engine:
+
+Update FileStorage: ([models/engine/file_storage.py](models/engine/file_storage.py))
+- Added public method `def close(self):`: calls `reload()` method for deserializing the JSON file to objects
+Update DBStorage: ([models/engine/db_storage.py](models/engine/db_storage.py))
+- Added public method `def close(self):`: call `remove()` method on the private session attribute (`self.__session`)
