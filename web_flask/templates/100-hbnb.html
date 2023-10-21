@@ -12,68 +12,70 @@
 	</head>
 	<body>
 		<div class="wrapper">
-			<header>
-				<div class="logo"></div>
-			</header>
-			<div class="container">
-				<section class="filters">
-					<div class="locations">
-						<h3>States</h3>
-						<h4>&nbsp;</h4>
-						<ul class="popover">
-						{% for state in states|sort(attribute='name') %}
-							<li class="sublist">
-								<h2>{{ state.name }}</h2>
-								<ul>
-								{% for city in state.cities|sort(attribute='name') %}
-									<li>{{ city.name }}</li>
-								{% endfor %}
-								</ul>
+			<div class="content">
+				<header>
+					<div class="logo"></div>
+				</header>
+				<div class="container">
+					<section class="filters">
+						<div class="locations">
+							<h3>States</h3>
+							<h4>&nbsp;</h4>
+							<ul class="popover">
+							{% for state in states|sort(attribute='name') %}
+								<li class="sublist">
+									<h2>{{ state.name }}</h2>
+									<ul>
+									{% for city in state.cities|sort(attribute='name') %}
+										<li>{{ city.name }}</li>
+									{% endfor %}
+									</ul>
+							{% endfor %}
+							</ul>
+						</div><!--
+						--><div class="popover_amenities">
+							<h3>Amenities</h3>
+							<h4>&nbsp;</h4>
+							<ul class="popover">
+							{% for amenity in amenities|sort(attribute='name') %}
+								<li>{{ amenity.name }}</li>
+							{% endfor %}
+							</ul>
+						</div>
+						<button>Search</button>
+					</section>
+					<section class="places">
+						<h1>Places</h1>
+						<div class="grid">
+						{% for place in places|sort(attribute='name') %}
+							<article>
+								<h2>{{ place.name }}</h2>
+								<div class="price_by_night">{{ place.price_by_night }}</div>
+								<div class="information">
+									<div class="max_guest">
+										<div class="guest_img"></div>
+										<p>{{ place.max_guest }} Guest{% if place.max_guest > 1 %}s{% endif %}</p>
+									</div>
+									<div class="number_rooms">
+										<div class="bed_img"></div>
+										<p>{{ place.number_rooms }} Bedroom{% if place.number_rooms > 1%}s{% endif %}</p>
+									</div>
+									<div class="number_bathrooms">
+										<div class="bath_img"></div>
+										<p>{{ place.number_bathrooms }} Bathroom{% if place.number_bathrooms > 1%}s{% endif %}</p>
+									</div>
+								</div>
+								<div class="user">
+									<strong>Owner</strong>: {{ place.user.name }}
+								</div>
+								<div class="description">
+									<p>{{ place.description|safe }}</p>
+								</div>
+							</article>
 						{% endfor %}
-						</ul>
-					</div><!--
-					--><div class="popover_amenities">
-						<h3>Amenities</h3>
-						<h4>&nbsp;</h4>
-						<ul class="popover">
-						{% for amenity in amenities|sort(attribute='name') %}
-							<li>{{ amenity.name }}</li>
-						{% endfor %}
-						</ul>
-					</div>
-					<button>Search</button>
-				</section>
-				<section class="places">
-					<h1>Places</h1>
-					<div class="grid">
-					{% for place in places|sort(attribute='name') %}
-						<article>
-							<h2>{{ place.name }}</h2>
-							<div class="price_by_night">{{ place.price_by_night }}</div>
-							<div class="information">
-								<div class="max_guest">
-									<div class="guest_img"></div>
-									<p>{{ place.max_guest }} Guest{% if place.max_guest > 1 %}s{% endif %}</p>
-								</div>
-								<div class="number_rooms">
-									<div class="bed_img"></div>
-									<p>{{ place.number_rooms }} Bedroom{% if place.number_rooms > 1%}s{% endif %}</p>
-								</div>
-								<div class="number_bathrooms">
-									<div class="bath_img"></div>
-									<p>{{ place.number_bathrooms }} Bathroom{% if place.number_bathrooms > 1%}s{% endif %}</p>
-								</div>
-							</div>
-							<div class="user">
-								<strong>Owner</strong>: {{ place.user.name }}
-							</div>
-							<div class="description">
-								<p>{{ place.description }}</p>
-							</div>
-						</article>
-					{% endfor %}
-					</div>
-				</section>
+						</div>
+					</section>
+				</div>
 			</div>
 			<footer>
 				Best School
