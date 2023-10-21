@@ -1,18 +1,18 @@
 header {
-	background-color: white;
+	background: white;
 	height: 70px;
 	width: 100%;
-	
+	position: relative;
 	border-bottom: 1px solid #CCCCCC;
 }
 
 .logo {
-	height: 100%;
+	display: inline-block;
 	width: 142px;
-
+	height: 60px;
+	position: absolute;
+	left: 20px;
+	top: 5px;
 	background-image: url("../images/logo.png");
 	background-repeat: no-repeat;
-	background-position: center;
-
-	margin-left: 20px;
 }
