@@ -8,23 +8,27 @@ app = Flask(__name__)
 
 
 @app.route('/states', strict_slashes=False)
-@app.route('/states/<id>', strict_slashes=False)
-def states(id=None):
+@app.route('/states/<state_id>', strict_slashes=False)
+def states(state_id=None):
     """Get the states resource.
 
     Args:
-        id: The id of the state.
+        state_id: The id of the state.
     """
 
     states = storage.all(State)
 
-    if id:
-        key = "State.{}".format(id)
-        state = states.get(key)
-        return render_template('9-states.html', states=None, state=state)
+    if state_id:
+        key = "State." + state_id
+        if key in states:
+            state = states[key]
+        else:
+            state = None
+
+        return render_template('9-states.html', state=state)
 
     states = states.values()
-    return render_template('9-states.html', states=states, state=None)
+    return render_template('9-states.html', states=states)
 
 
 @app.teardown_appcontext
