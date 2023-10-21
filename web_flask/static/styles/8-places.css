@@ -22,18 +22,17 @@
 .place_header {
 	display: flex;
 	flex-direction: row;
-	margin: 0;
-	margin-bottom: 50px;
+	justify-content: space-between;
+	padding-bottom: 10px;
 }
 
 .places h2 {
+	margin: 15px 0;
+	margin-right: 10px;
 	font-size: 30px;
-	text-align: center;
-	display: inline-block;
 }
 
 .price_by_night {
-	display: inline-block;
 	min-width: 60px;
 	height: 60px;
 
