@@ -20,6 +20,8 @@
 }
 
 .place_header {
+	display: flex;
+	flex-direction: row;
 	margin: 0;
 	margin-bottom: 50px;
 }
